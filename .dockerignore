@@ -1,42 +1,117 @@
-# See https://docs.docker.com/engine/reference/builder/#dockerignore-file for more about ignoring files.
+# Git
+.git
+.gitignore
+.gitattributes
 
-# Ignore git directory.
-/.git/
-/.gitignore
+# Documentation
+README.md
+PROVA.md
+*.md
 
-# Ignore bundler config.
-/.bundle
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
 
-# Ignore all environment files (except templates).
-/.env*
-!/.env*.erb
+# Development dependencies
+node_modules
+bower_components
 
-# Ignore all default key files.
-/config/master.key
-/config/credentials/*.key
+# Environment files
+.env
+.env.*
+*.env
 
-# Ignore all logfiles and tempfiles.
-/log/*
-/tmp/*
-!/log/.keep
-!/tmp/.keep
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
 
-# Ignore pidfiles, but keep the directory.
-/tmp/pids/*
-!/tmp/pids/.keep
+# Test files
+spec/
+test/
+coverage/
+.rspec
 
-# Ignore storage (uploaded files in development and any SQLite databases).
-/storage/*
-!/storage/.keep
-/tmp/storage/*
-!/tmp/storage/.keep
+# Development files
+.byebug_history
+.ruby-version
+.ruby-gemset
 
-# Ignore CI service files.
-/.github
+# Logs
+log/*
+*.log
 
-# Ignore development files
-/.devcontainer
+# Temporary files
+tmp/*
+!tmp/.keep
+!tmp/pids
+!tmp/pids/.keep
 
-# Ignore Docker-related files
-/.dockerignore
-/Dockerfile*
+# Storage (uploads in development)
+storage/*
+!storage/.keep
+
+# Cache
+.cache
+.sass-cache
+
+# Public uploads (if using ActiveStorage in development)
+public/uploads
+public/system
+
+# Database files
+*.sqlite3
+*.sqlite3-journal
+db/*.sqlite3
+db/*.sqlite3-journal
+
+# Compiled assets (will be precompiled in production)
+public/assets
+public/packs
+public/packs-test
+
+# Yarn
+yarn-error.log
+.yarn-integrity
+
+# Ignore bundler config
+.bundle
+
+# Ignore master key for decrypting credentials and more
+config/master.key
+
+# Backup files
+*.bak
+*.backup
+
+# OS files
+Thumbs.db
+
+# Ruby version managers
+.rbenv
+.rvm
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+.circleci
+
+# Package manager lock files (if using specific versions)
+# Uncomment if needed:
+# Gemfile.lock
+# yarn.lock
+# package-lock.json
+
+# Local scripts
+bin/brakeman
+bin/rubocop
+bin/setup
+
+# Vendor cache
+vendor/cache
+
