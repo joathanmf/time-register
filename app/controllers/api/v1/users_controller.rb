@@ -38,7 +38,10 @@ module Api
         end
       end
 
-      def time_registers; end
+      def time_registers
+        time_registers = @user.clockings
+        render json: time_registers
+      end
 
       private
 
