@@ -7,49 +7,69 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-time_register_development}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
     networks:
       - rails_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails server -b 0.0.0.0"
-    environment:
-      RAILS_ENV: ${RAILS_ENV:-development}
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_NAME: ${POSTGRES_DB:-time_register_development}
-      DATABASE_USER: ${POSTGRES_USER:-postgres}
-      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+  redis:
+    image: redis:8-alpine
     volumes:
-      - .:/app
-      - bundle_cache:/usr/local/bundle
-      - rails_cache:/app/tmp/cache
-    ports:
-      - "${RAILS_PORT:-3000}:3000"
-    depends_on:
-      db:
-        condition: service_healthy
+      - redis_data:/data
     networks:
       - rails_network
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/up || exit 1"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
       retries: 5
-      start_period: 40s
-    stdin_open: true
-    tty: true
+
+  app:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails server -b 0.0.0.0"
+    environment:
+      DATABASE_HOST: db
+      DATABASE_NAME: ${POSTGRES_DB:-time_register_development}
+      DATABASE_USER: ${POSTGRES_USER:-postgres}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      RAILS_ENV: development
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rails_network
+
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USER: ${POSTGRES_USER:-postgres}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DATABASE_NAME: ${POSTGRES_DB:-time_register_development}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      RAILS_ENV: development
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rails_network
 
 networks:
   rails_network:
@@ -57,5 +77,5 @@ networks:
 
 volumes:
   postgres_data:
+  redis_data:
   bundle_cache:
-  rails_cache:
