@@ -1,0 +1,55 @@
+module Api
+  module V1
+    class UsersController < ApplicationController
+      before_action :set_user, except: [:index, :create]
+
+      def index
+        users = User.all
+        render json: users
+      end
+
+      def show
+        render json: @user
+      end
+
+      def create
+        user = User.new(user_params)
+
+        if user.save
+          render json: user, status: :created
+        else
+          render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      def update
+        if @user.update(user_params)
+          render json: @user
+        else
+          render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      def destroy
+        if @user.destroy
+          head :no_content
+        else
+          render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      def time_registers; end
+
+      private
+
+      def user_params
+        params.require(:user).permit(:name, :email)
+      end
+
+      def set_user
+        @user = User.find_by(id: params[:id])
+        render json: { error: 'User not found' }, status: :not_found unless @user
+      end
+    end
+  end
+end
