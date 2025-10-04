@@ -13,6 +13,10 @@
 #  index_users_on_email  (email) UNIQUE
 #
 class User < ApplicationRecord
+  has_many :clockings, dependent: :destroy
+
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true
+  # Validações de formato de email
+  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
 end
