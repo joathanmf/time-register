@@ -6,6 +6,8 @@ Rails.application.routes.draw do
       resources :users do
         get 'time_registers', on: :member
       end
+
+      resources :time_registers
     end
   end
 end
