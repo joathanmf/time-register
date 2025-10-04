@@ -14,6 +14,7 @@
 #
 class User < ApplicationRecord
   has_many :clockings, dependent: :destroy
+  has_many :report_processes, dependent: :destroy
 
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true

@@ -1,7 +1,7 @@
 module Api
   module V1
     class TimeRegistersController < ApplicationController
-      before_action :set_time_register, except: [:index, :create]
+      before_action :set_time_register, except: [ :index, :create ]
 
       def index
         time_registers = Clocking.all
@@ -45,8 +45,9 @@ module Api
       end
 
       def set_time_register
-        @time_registers = Clocking.find_by(id: params[:id])
-        render json: { error: 'Time Register not found' }, status: :not_found unless @time_registers
+        @time_registers = Clocking.find(params[:id])
+      rescue ActiveRecord::RecordNotFound
+        render json: { error: "Time register not found" }, status: :not_found
       end
     end
   end

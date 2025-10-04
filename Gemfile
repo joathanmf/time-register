@@ -33,6 +33,8 @@ gem "sidekiq", "~> 8.0", ">= 8.0.7"
 
 gem "redis", "~> 5.4", ">= 5.4.1"
 
+gem "csv", "~> 3.3", ">= 3.3.5"
+
 group :development do
   gem "annotaterb", "~> 4.19"
 end
