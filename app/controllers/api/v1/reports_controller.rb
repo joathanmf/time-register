@@ -7,7 +7,7 @@ module Api
         render json: {
           process_id: @report_process.process_id,
           status: @report_process.status,
-          progress: @report_process.progress,
+          progress: @report_process.progress
         }
       end
 

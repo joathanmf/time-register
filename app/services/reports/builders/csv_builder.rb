@@ -16,7 +16,7 @@ module Reports
       end
 
       def build
-        sleep 15 # Simula um processamento demorado
+        # sleep 15 # Simula um processamento demorado
 
         CSV.generate(headers: true) do |csv|
           add_headers(csv)

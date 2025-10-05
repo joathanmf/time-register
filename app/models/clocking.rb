@@ -32,7 +32,7 @@ class Clocking < ApplicationRecord
   def clock_out_after_clock_in
     return if clock_out.nil? || clock_in.nil?
 
-    if clock_out < clock_in
+    if clock_out <= clock_in
       errors.add(:clock_out, "must be after clock in time")
     end
   end

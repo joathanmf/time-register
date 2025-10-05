@@ -52,4 +52,7 @@ group :development, :test do
   gem "dotenv-rails"
 
   gem "rspec-rails", "~> 8.0", ">= 8.0.2"
+  gem "factory_bot_rails", "~> 6.5", ">= 6.5.1"
+  gem "shoulda-matchers", "~> 6.5"
+  gem "faker", "~> 3.5", ">= 3.5.2"
 end
