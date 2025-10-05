@@ -18,7 +18,7 @@ module Api
           }, status: :unprocessable_entity
         end
 
-        send_data @report_process.csv_file.download,
+        send_data @report_process.file.download,
                   filename: "report_#{@report_process.process_id}.csv",
                   type: "text/csv",
                   disposition: "attachment"

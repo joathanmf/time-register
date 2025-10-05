@@ -25,7 +25,7 @@
 class ReportProcess < ApplicationRecord
   belongs_to :user
 
-  has_one_attached :csv_file
+  has_one_attached :file
 
   enum :status, { queued: "queued", processing: "processing", completed: "completed", failed: "failed" }, prefix: true
 
@@ -42,7 +42,7 @@ class ReportProcess < ApplicationRecord
   end
 
   def mark_as_completed!(file_io)
-    csv_file.attach(
+    file.attach(
       io: file_io,
       filename: "report_#{process_id}.csv",
       content_type: "text/csv"
@@ -68,12 +68,12 @@ class ReportProcess < ApplicationRecord
   end
 
   def file_ready?
-    status_completed? && csv_file.attached?
+    status_completed? && file.attached?
   end
 
   def file_size
-    return 0 unless csv_file.attached?
-    csv_file.byte_size
+    return 0 unless file.attached?
+    file.byte_size
   end
 
   private
