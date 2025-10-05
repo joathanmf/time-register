@@ -44,21 +44,19 @@ module Api
       end
 
       def reports
-        start_date = params[:start_date]
-        end_date = params[:end_date]
-        report_process = @user.report_processes.new(start_date: start_date, end_date: end_date)
+        result = Reports::CreateService.call(
+          user: @user,
+          start_date: params[:start_date],
+          end_date: params[:end_date]
+        )
 
-        if report_process.save
-          GenerateReportJob.perform_later(report_process.id)
-
+        if result.success?
           render json: {
-            process_id: report_process.process_id,
-            status: report_process.status
+            process_id: result.report_process.process_id,
+            status: result.report_process.status
           }, status: :accepted
         else
-          render json: {
-            errors: report_process.errors.full_messages
-          }, status: :unprocessable_entity
+          render json: { errors: result.errors }, status: :unprocessable_entity
         end
       end
 
