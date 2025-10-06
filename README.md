@@ -65,7 +65,7 @@ Copie o arquivo de exemplo e configure as variáveis:
 cp .env.example .env
 ```
 
-Edite o arquivo `.env` com suas configurações locais:
+Edite o arquivo `.env` com suas configurações locais (para desenvolvimento local sem Docker):
 
 ```env
 # Rails environment
@@ -75,17 +75,21 @@ RAILS_ENV=development
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=time_register_development
-POSTGRES_PORT=5432
 
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
 DATABASE_USER=postgres
 DATABASE_PASSWORD=postgres
 DATABASE_NAME=time_register_development
-DATABASE_PORT=5432
-DATABASE_HOST=localhost
 
 # Redis configuration
-REDIS_URL=redis://localhost:6379
+REDIS_URL=redis://localhost:6379/0
+
+# Rails configuration
+RAILS_MAX_THREADS=5
 ```
+
+> **Nota:** Para Docker, as variáveis de ambiente já estão configuradas nos arquivos `docker-compose.yml` e `docker-compose.production.yml`.
 
 ### 4. Setup do Banco de Dados
 
@@ -100,7 +104,10 @@ bundle exec rails db:seed  # Opcional: popula com dados de exemplo
 #### Com Docker
 
 ```bash
-docker-compose up -d db redis
+# Inicie os containers
+docker-compose up -d
+
+# Execute as migrações
 docker-compose exec app rails db:create
 docker-compose exec app rails db:migrate
 docker-compose exec app rails db:seed  # Opcional
@@ -126,17 +133,40 @@ A aplicação estará disponível em: `http://localhost:3000`
 ### Desenvolvimento com Docker Compose
 
 ```bash
-# Inicie todos os containers
+# Inicie todos os containers (desenvolvimento)
 docker-compose up -d
 
 # Visualize os logs
 docker-compose logs -f
+
+# Visualize logs de um serviço específico
+docker-compose logs -f app
+docker-compose logs -f sidekiq
 
 # Pare os containers
 docker-compose down
 ```
 
 A aplicação estará disponível em: `http://localhost:3000`
+
+### Produção com Docker Compose
+
+```bash
+# Configurar variáveis de ambiente para produção
+cp .env.production .env
+# Edite .env com suas credenciais reais (RAILS_MASTER_KEY, SECRET_KEY_BASE, etc.)
+
+# Inicie todos os containers (produção)
+docker-compose -f docker-compose.production.yml up -d
+
+# Visualize os logs
+docker-compose -f docker-compose.production.yml logs -f
+
+# Pare os containers
+docker-compose -f docker-compose.production.yml down
+```
+
+> **Documentação Completa do Docker:** Veja [DOCKER.md](DOCKER.md) para informações detalhadas sobre configuração, troubleshooting e melhores práticas.
 
 ### Executar Comandos no Container
 
@@ -152,6 +182,9 @@ docker-compose exec app rails db:seed
 
 # Executar testes
 docker-compose exec app rspec
+
+# Bash no container
+docker-compose exec app bash
 ```
 
 ## 📚 Documentação da API

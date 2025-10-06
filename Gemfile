@@ -35,6 +35,8 @@ gem "redis", "~> 5.4", ">= 5.4.1"
 
 gem "csv", "~> 3.3", ">= 3.3.5"
 
+gem "dotenv-rails", "~> 3.1", ">= 3.1.8"
+
 group :development do
   gem "annotaterb", "~> 4.19"
 end
@@ -48,8 +50,6 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
-
-  gem "dotenv-rails"
 
   gem "rspec-rails", "~> 8.0", ">= 8.0.2"
 
