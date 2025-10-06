@@ -634,9 +634,9 @@ spec/
 │       ├── builders/
 │       │   └── csv_builder_spec.rb
 │       ├── calculators/
-│       │   └── time_calculator_spec.rb
+│       │   └── work_time_calculator_spec.rb
 │       ├── formatters/
-│       │   └── date_formatter_spec.rb
+│       │   └── date_time_formatter_spec.rb
 │       ├── create_service_spec.rb
 │       ├── base_report_spec.rb
 │       ├── csv_report_spec.rb
