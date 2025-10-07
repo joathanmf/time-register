@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:18-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-time_register_development}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: time_register_development
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -12,7 +12,7 @@ services:
     networks:
       - rails_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,62 +31,6 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile.development
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails server -b 0.0.0.0"
-    environment:
-      RAILS_ENV: development
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_USER: ${DATABASE_USER:-postgres}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
-      DATABASE_NAME: ${DATABASE_NAME:-time_register_development}
-      REDIS_URL: redis://redis:6379/0
-      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
-    volumes:
-      - .:/app
-      - bundle_cache:/usr/local/bundle
-      - rails_cache:/app/tmp/cache
-    ports:
-      - "3000:3000"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - rails_network
-    stdin_open: true
-    tty: true
-
-  sidekiq:
-    build:
-      context: .
-      dockerfile: Dockerfile.development
-    command: bundle exec sidekiq -C config/sidekiq.yml
-    environment:
-      RAILS_ENV: development
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_USER: ${DATABASE_USER:-postgres}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
-      DATABASE_NAME: ${DATABASE_NAME:-time_register_development}
-      REDIS_URL: redis://redis:6379/0
-      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
-    volumes:
-      - .:/app
-      - bundle_cache:/usr/local/bundle
-      - rails_cache:/app/tmp/cache
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - rails_network
-
 networks:
   rails_network:
     driver: bridge
@@ -94,5 +38,3 @@ networks:
 volumes:
   postgres_data:
   redis_data:
-  bundle_cache:
-  rails_cache:

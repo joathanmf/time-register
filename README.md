@@ -29,15 +29,15 @@ Time Register é uma aplicação API-only desenvolvida em Ruby on Rails que gere
 
 ## 🔧 Pré-requisitos
 
-### Desenvolvimento Local (sem Docker)
+### Desenvolvimento Local (Recomendado)
 
 - **Ruby** 3.4.2
-- **PostgreSQL** 14 ou superior
-- **Redis** 6 ou superior
 - **Bundler**
 - **Foreman** (para usar Procfile.dev)
 
-### Desenvolvimento com Docker
+**Nota:** PostgreSQL e Redis **não precisam** ser instalados localmente, pois serão executados via Docker Compose.
+
+### Produção com Docker
 
 - **Docker**
 - **Docker Compose**
@@ -59,23 +59,18 @@ bundle install
 
 ### 3. Configuração de Variáveis de Ambiente
 
-Copie o arquivo de exemplo e configure as variáveis:
+#### Para Desenvolvimento
+
+Copie o arquivo de exemplo:
 
 ```bash
 cp .env.example .env
 ```
 
-Edite o arquivo `.env` com suas configurações locais (para desenvolvimento local sem Docker):
+O arquivo `.env` já vem configurado para desenvolvimento local com Docker Compose:
 
 ```env
-# Rails environment
-RAILS_ENV=development
-
-# Database configuration
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_DB=time_register_development
-
+# Database configuration (for local development with Docker Compose)
 DATABASE_HOST=localhost
 DATABASE_PORT=5432
 DATABASE_USER=postgres
@@ -84,18 +79,55 @@ DATABASE_NAME=time_register_development
 
 # Redis configuration
 REDIS_URL=redis://localhost:6379/0
+```
+
+#### Para Produção
+
+Para produção, copie o arquivo de exemplo de produção:
+
+```bash
+cp .env.production.example .env
+```
+
+Edite o arquivo `.env` com suas credenciais reais:
+
+```env
+# Database configuration
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_secure_password_here
+POSTGRES_DB=time_register_production
+
+DATABASE_HOST=db
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=your_secure_password_here
+DATABASE_NAME=time_register_production
+
+# Redis configuration
+REDIS_URL=redis://redis:6379/0
 
 # Rails configuration
 RAILS_MAX_THREADS=5
 
-# Production only
-RAILS_MASTER_KEY=
-SECRET_KEY_BASE=
+# Production secrets (REQUIRED FOR PRODUCTION)
+# Generate RAILS_MASTER_KEY from config/master.key
+RAILS_MASTER_KEY=your_master_key_here
+
+# Generate SECRET_KEY_BASE with: bundle exec rails secret
+SECRET_KEY_BASE=your_secret_key_base_here
 ```
 
-### 4. Setup do Banco de Dados
+### 4. Iniciar PostgreSQL e Redis (Desenvolvimento)
 
-#### Desenvolvimento Local
+```bash
+# Inicie apenas PostgreSQL e Redis via Docker Compose
+docker-compose up -d
+
+# Verifique se os serviços estão rodando
+docker-compose ps
+```
+
+### 5. Setup do Banco de Dados
 
 ```bash
 bundle exec rails db:create
@@ -103,26 +135,19 @@ bundle exec rails db:migrate
 bundle exec rails db:seed  # Opcional: popula com dados de exemplo
 ```
 
-#### Com Docker
-
-```bash
-# Inicie os containers
-docker-compose up -d
-
-# Execute as migrações
-docker-compose exec app rails db:create
-docker-compose exec app rails db:migrate
-docker-compose exec app rails db:seed  # Opcional
-```
-
 ## 🚀 Como Executar
 
-### Desenvolvimento Local com Procfile.dev
+### Desenvolvimento Local (Recomendado)
 
-O projeto utiliza Foreman para gerenciar múltiplos processos (Rails server + Sidekiq):
+O projeto utiliza uma abordagem híbrida para desenvolvimento:
+- **PostgreSQL e Redis:** Executados via Docker Compose (não precisa instalar na máquina)
+- **Rails Server e Sidekiq:** Executados via Foreman com `bin/dev`
 
 ```bash
-# Execute todos os serviços
+# 1. Inicie PostgreSQL e Redis (se ainda não estiverem rodando)
+docker-compose up -d
+
+# 2. Execute a aplicação e o Sidekiq
 bin/dev
 ```
 
@@ -132,34 +157,51 @@ Isso iniciará:
 
 A aplicação estará disponível em: `http://localhost:3000`
 
-### Desenvolvimento com Docker Compose
+**Vantagens dessa abordagem:**
+- ✅ Não precisa instalar PostgreSQL e Redis na máquina
+- ✅ Desenvolvimento ágil com live reload
+- ✅ Fácil acesso aos logs e debugging
+- ✅ Menor overhead comparado a rodar tudo no Docker
+
+### Comandos Úteis (Desenvolvimento)
 
 ```bash
-# Inicie todos os containers (desenvolvimento)
-docker-compose up -d
+# Parar PostgreSQL e Redis
+docker-compose down
 
-# Visualize os logs
+# Ver logs do PostgreSQL e Redis
 docker-compose logs -f
 
-# Visualize logs de um serviço específico
-docker-compose logs -f app
-docker-compose logs -f sidekiq
+# Reiniciar PostgreSQL e Redis
+docker-compose restart
 
-# Pare os containers
-docker-compose down
+# Executar console do Rails
+bundle exec rails console
+
+# Executar testes
+bundle exec rspec
+
+# Executar migrações
+bundle exec rails db:migrate
 ```
-
-A aplicação estará disponível em: `http://localhost:3000`
 
 ### Produção com Docker Compose
 
-```bash
-# Configurar variáveis de ambiente para produção
-cp .env.example .env
-# Edite .env com suas credenciais reais (RAILS_MASTER_KEY, SECRET_KEY_BASE, etc.)
+Para produção, **todos os serviços** (PostgreSQL, Redis, Rails App e Sidekiq) rodam via Docker:
 
-# Inicie todos os containers (produção)
+```bash
+# 1. Configure as variáveis de ambiente para produção
+cp .env.production.example .env
+# Edite .env com suas credenciais reais
+
+# 2. Inicie todos os containers
 docker-compose -f docker-compose.production.yml up -d
+
+# 3. Execute as migrações
+docker-compose -f docker-compose.production.yml exec app rails db:migrate
+
+# 4. (Opcional) Execute seeds
+docker-compose -f docker-compose.production.yml exec app rails db:seed
 
 # Visualize os logs
 docker-compose -f docker-compose.production.yml logs -f
@@ -168,23 +210,25 @@ docker-compose -f docker-compose.production.yml logs -f
 docker-compose -f docker-compose.production.yml down
 ```
 
-### Executar Comandos no Container
+A aplicação estará disponível em: `http://localhost:3000`
+
+### Executar Comandos no Container (Produção)
 
 ```bash
 # Rails console
-docker-compose exec app rails console
+docker-compose -f docker-compose.production.yml exec app rails console
 
 # Executar migrações
-docker-compose exec app rails db:migrate
+docker-compose -f docker-compose.production.yml exec app rails db:migrate
 
 # Executar seeds
-docker-compose exec app rails db:seed
+docker-compose -f docker-compose.production.yml exec app rails db:seed
 
 # Executar testes
-docker-compose exec app rspec
+docker-compose -f docker-compose.production.yml exec app rspec
 
 # Bash no container
-docker-compose exec app bash
+docker-compose -f docker-compose.production.yml exec app bash
 ```
 
 ## 📚 Documentação da API
@@ -614,29 +658,37 @@ end
 
 ### Decisões Técnicas
 
-#### 1. **Clocking vs TimeRegister**
+#### 1. **Abordagem Híbrida de Desenvolvimento**
+Para desenvolvimento local, optei por uma abordagem híbrida:
+- **Docker Compose (`docker-compose.yml`):** Executa apenas PostgreSQL e Redis, evitando a necessidade de instalação local dessas dependências
+- **Foreman (`bin/dev`):** Executa Rails Server e Sidekiq localmente, proporcionando desenvolvimento mais ágil com live reload e melhor experiência de debugging
+- **Docker Compose Production (`docker-compose.production.yml`):** Executa todos os serviços (PostgreSQL, Redis, Rails App, Sidekiq) containerizados para produção
+
+Esta abordagem oferece o melhor dos dois mundos: conveniência do Docker para serviços de infraestrutura e agilidade do desenvolvimento local para a aplicação.
+
+#### 2. **Clocking vs TimeRegister**
 Optei por usar `Clocking` ao invés de `TimeRegister` porque `TimeRegister` já faz parte do namespace do Rails e poderia conflitar com funcionalidades internas do framework.
 
-#### 2. **Serialização JSON Nativa**
+#### 3. **Serialização JSON Nativa**
 Utilizo o serializador JSON nativo do Rails por se tratar de uma aplicação mais simples. Em um cenário de produção com necessidades mais complexas, utilizaria gems como **Alba** (com OJ) ou **Blueprinter** para ter mais controle sobre a serialização.
 
-#### 3. **Foreman e Procfile.dev**
-Embora o Docker Compose seja usado conforme solicitado, optei por também disponibilizar o Foreman com `Procfile.dev` para agilizar o desenvolvimento local, já que é uma ferramenta que utilizo no dia a dia e permite iniciar rapidamente todos os serviços necessários.
+#### 4. **Foreman e Procfile.dev**
+Embora o Docker Compose é usado conforme solicitado, optei por também disponibilizar o Foreman com `Procfile.dev` para agilizar o desenvolvimento local, já que é uma ferramenta que utilizo no dia a dia e permite iniciar rapidamente todos os serviços necessários.
 
-#### 4. **Refatoração para Design Patterns**
+#### 5. **Refatoração para Design Patterns**
 Inicialmente, concentrei toda a lógica de geração de relatórios em um único serviço devido ao tempo. Porém, refatorei aplicando Design Patterns e princípios SOLID para:
 - **Single Responsibility:** Cada classe tem uma responsabilidade única
 - **Open/Closed:** Fácil extensão sem modificar código existente
-- **Dependency Inversion:** Depende de abstrações, não de implementações concretas
+Embora o Docker Compose seja usado conforme solicitado, optei por também disponibilizar o Foreman com `Procfile.dev` para agilizar o desenvolvimento local, já que é uma ferramenta que utilizo no dia a dia e permite iniciar rapidamente todos os serviços necessários.
 - Melhor manutenabilidade e facilidade de expansão
 
-#### 5. **Sidekiq como Adapter**
+#### 6. **Sidekiq como Adapter**
 Escolhi o **Sidekiq** como adapter para ActiveJob por ser amplamente utilizado na comunidade Ruby, ter excelente performance e ser familiar tanto para mim quanto para a maioria dos desenvolvedores Rails.
 
-#### 6. **Rails 7.2**
+#### 7. **Rails 7.2**
 Utilizei Rails 7.2.2.2 pela maior familiaridade e por ser a versão que mais utilizo no dia a dia, além de contar com todas as features modernas do framework.
 
-#### 7. **Claude Sonnet 4.5 como Assistente**
+#### 8. **Claude Sonnet 4.5 como Assistente**
 Utilizei IA (Claude Sonnet 4.5) para auxiliar em tarefas repetitivas e para brainstorming de ideias, permitindo focar na lógica de negócio e arquitetura.
 
 ### Princípios SOLID Aplicados
@@ -690,29 +742,21 @@ spec/
 
 ### Como Executar os Testes
 
-#### Todos os testes
+#### Desenvolvimento Local
+
 ```bash
-# Desenvolvimento local
+# Certifique-se de que PostgreSQL e Redis estão rodando
+docker-compose up -d
+
+# Execute todos os testes
 bundle exec rspec
 
-# Com Docker
-docker-compose exec app rspec
-```
-
-#### Testes específicos
-```bash
-# Testar apenas models
+# Testes específicos
 bundle exec rspec spec/models
-
-# Testar apenas requests
 bundle exec rspec spec/requests
-
-# Testar um arquivo específico
 bundle exec rspec spec/models/user_spec.rb
-```
 
-#### Com formato de documentação
-```bash
+# Com formato de documentação
 bundle exec rspec --format documentation
 ```
 
