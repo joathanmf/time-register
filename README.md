@@ -87,9 +87,11 @@ REDIS_URL=redis://localhost:6379/0
 
 # Rails configuration
 RAILS_MAX_THREADS=5
-```
 
-> **Nota:** Para Docker, as variáveis de ambiente já estão configuradas nos arquivos `docker-compose.yml` e `docker-compose.production.yml`.
+# Production only
+RAILS_MASTER_KEY=
+SECRET_KEY_BASE=
+```
 
 ### 4. Setup do Banco de Dados
 
@@ -153,7 +155,7 @@ A aplicação estará disponível em: `http://localhost:3000`
 
 ```bash
 # Configurar variáveis de ambiente para produção
-cp .env.production .env
+cp .env.example .env
 # Edite .env com suas credenciais reais (RAILS_MASTER_KEY, SECRET_KEY_BASE, etc.)
 
 # Inicie todos os containers (produção)
@@ -165,8 +167,6 @@ docker-compose -f docker-compose.production.yml logs -f
 # Pare os containers
 docker-compose -f docker-compose.production.yml down
 ```
-
-> **Documentação Completa do Docker:** Veja [DOCKER.md](DOCKER.md) para informações detalhadas sobre configuração, troubleshooting e melhores práticas.
 
 ### Executar Comandos no Container
 
