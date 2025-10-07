@@ -7,15 +7,6 @@
 # Ignore bundler config.
 /.bundle
 
-# Ignore all environment files except examples
-/.env
-/.env.local
-/.env.development
-/.env.production
-/.env.test
-/.env.*.local
-!/.env*.example
-
 # Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*
@@ -71,10 +62,6 @@ Thumbs.db
 .env*
 !.env.example
 
-# Documentation
-README.md
-PROVA.md
-
 # Logs
 log/*
 *.log
@@ -96,19 +83,4 @@ test
 
 # Coverage
 coverage
-
-# IDE
-.vscode
-.idea
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Docker
-docker-compose*.yml
-Dockerfile*
-.dockerignore
 
