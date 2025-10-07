@@ -1,16 +1,14 @@
 services:
   db:
     image: postgres:18-alpine
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+    env_file:
+      - .env.production
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
     networks:
       - rails_network_prod
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,17 +34,10 @@ services:
       args:
         RUBY_VERSION: 3.4.2
     command: bash -c "rm -f tmp/pids/server.pid && ./bin/rails server -b 0.0.0.0"
+    env_file:
+      - .env.production
     environment:
       RAILS_ENV: production
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
-      REDIS_URL: redis://redis:6379/0
-      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
     volumes:
       - storage_prod:/rails/storage
     ports:
@@ -67,17 +58,10 @@ services:
       args:
         RUBY_VERSION: 3.4.2
     command: bundle exec sidekiq -C config/sidekiq.yml
+    env_file:
+      - .env.production
     environment:
       RAILS_ENV: production
-      DATABASE_HOST: db
-      DATABASE_PORT: 5432
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
-      REDIS_URL: redis://redis:6379/0
-      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
     volumes:
       - storage_prod:/rails/storage
     depends_on:
@@ -97,4 +81,3 @@ volumes:
   postgres_data_prod:
   redis_data_prod:
   storage_prod:
-

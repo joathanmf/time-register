@@ -86,10 +86,10 @@ REDIS_URL=redis://localhost:6379/0
 Para produção, copie o arquivo de exemplo de produção:
 
 ```bash
-cp .env.production.example .env
+cp .env.production.example .env.production
 ```
 
-Edite o arquivo `.env` com suas credenciais reais:
+Edite o arquivo `.env.production` com suas credenciais reais:
 
 ```env
 # Database configuration
@@ -181,8 +181,8 @@ bundle exec rails console
 # Executar testes
 bundle exec rspec
 
-# Executar migrações
-bundle exec rails db:migrate
+# Setup do banco de dados (criar, migrar, seed)
+bundle exec rails db:setup
 ```
 
 ### Produção com Docker Compose
@@ -191,8 +191,8 @@ Para produção, **todos os serviços** (PostgreSQL, Redis, Rails App e Sidekiq)
 
 ```bash
 # 1. Configure as variáveis de ambiente para produção
-cp .env.production.example .env
-# Edite .env com suas credenciais reais
+cp .env.production.example .env.production
+# Edite .env.production com suas credenciais reais
 
 # 2. Inicie todos os containers
 docker-compose -f docker-compose.production.yml up -d
@@ -223,12 +223,6 @@ docker-compose -f docker-compose.production.yml exec app rails db:migrate
 
 # Executar seeds
 docker-compose -f docker-compose.production.yml exec app rails db:seed
-
-# Executar testes
-docker-compose -f docker-compose.production.yml exec app rspec
-
-# Bash no container
-docker-compose -f docker-compose.production.yml exec app bash
 ```
 
 ## 📚 Documentação da API
@@ -783,7 +777,27 @@ O projeto conta com cobertura de testes em:
 - **Faker:** Geração de dados fake realistas
 - **Shoulda Matchers:** Matchers para validações e associações Rails
 
-## 🚢 Deploy (TODO)
+## 🚢 Deploy
+
+1. Você pode usar uma VPS (DigitalOcean, AWS, etc.) ou um serviço de hospedagem que suporte Docker.
+2. Configure o arquivo `.env.production` com suas variáveis de ambiente.
+3. Construa os containers:
+   ```bash
+   docker compose -f docker-compose.production.yml build --no-cache
+   ```
+4. Execute as migrações:
+   ```bash
+   docker compose -f docker-compose.production.yml run --rm app bin/rails db:create db:migrate
+   ```
+5. (Opcional) Execute seeds:
+   ```bash
+   docker compose -f docker-compose.production.yml run --rm app bin/rails db:seed
+   ```
+6. Inicie os serviços:
+   ```bash
+   docker compose -f docker-compose.production.yml up -d
+   ```
+
 
 ## 📝 Licença
 
