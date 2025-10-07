@@ -745,8 +745,6 @@ O projeto conta com cobertura de testes em:
 
 Este projeto foi desenvolvido como parte de um teste técnico para a Brobot.
 
----
-
 ## 🙏 Agradecimentos
 
 - Brobot pela oportunidade
