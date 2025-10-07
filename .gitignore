@@ -60,7 +60,7 @@ Thumbs.db
 
 # Environment files
 .env*
-!.env.example
+!.env*.example
 
 # Logs
 log/*
